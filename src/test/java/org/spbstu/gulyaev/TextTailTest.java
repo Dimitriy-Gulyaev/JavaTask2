@@ -3,6 +3,9 @@ package org.spbstu.gulyaev;
 import org.junit.Test;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,13 +13,14 @@ public class TextTailTest {
 
     @Test
     public void testingTextTailOnCharWithOneStringFile() throws IOException {
-        TextTail tail = new TextTail(5, 0);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("input.txt"));
+        TextTail tail = new TextTail(5, null,
+                "input.txt", "output.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
         writer.write("asd asd asdasd asdasd asd asdfg");
         writer.flush();
-        tail.tail("input.txt", "output.txt");
+        tail.tail(tail.inputName, tail.outputName);
         String test = "";
-        BufferedReader reader = new BufferedReader(new FileReader("output.txt"));
+        BufferedReader reader = new BufferedReader(new FileReader(tail.outputName));
         String line = reader.readLine();
         while (line != null) {
             test += line;
@@ -27,32 +31,31 @@ public class TextTailTest {
 
     @Test
     public void testingTextTailOnCharWithManyStringFile() throws IOException {
-        TextTail tail = new TextTail(12, 0);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("input.txt"));
+        TextTail tail = new TextTail(12, null,
+                "input.txt", "output.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
         writer.write("qwertyqwerty");
-        writer.write("qwertyqwertyqwerty");
+        writer.newLine();
+        writer.write("qwertyqwertyasdasd");
+        writer.newLine();
         writer.write("qwerty");
+        writer.newLine();
         writer.flush();
-        tail.tail("input.txt", "output.txt");
-        String test = "";
-        BufferedReader reader = new BufferedReader(new FileReader("output.txt"));
-        String line = reader.readLine();
-        while (line != null) {
-            test += line;
-            line = reader.readLine();
-        }
-        assertEquals("qwertyqwerty", test);
+        tail.tail(tail.inputName, tail.outputName);
+        List<String> test = Files.readAllLines(Paths.get(tail.outputName));
+        assertEquals("asdasd" + '\n' + "qwerty", test.get(0) + '\n' + test.get(1));
     }
 
     @Test
     public void testingTextTailOnOneStringFile() throws IOException {
-        TextTail tail = new TextTail(0, 1);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("input.txt"));
+        TextTail tail = new TextTail(null, 1,
+                "input.txt", "output.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.outputName));
         writer.write("asd asdfg");
         writer.flush();
-        tail.tail("input.txt", "output.txt");
+        tail.tail(tail.inputName, tail.inputName);
         String test = "";
-        BufferedReader reader = new BufferedReader(new FileReader("output.txt"));
+        BufferedReader reader = new BufferedReader(new FileReader(tail.outputName));
         String line = reader.readLine();
         while (line != null) {
             test += line;
@@ -63,8 +66,9 @@ public class TextTailTest {
 
     @Test
     public void testingTextTailOnManyStringsFile() throws IOException {
-        TextTail tail = new TextTail(0, 2);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("input.txt"));
+        TextTail tail = new TextTail(null, 2,
+                "input.txt", "output.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
         writer.write("asd asdfg");
         writer.newLine();
         writer.write("asd asdfgasdfgh");
@@ -73,14 +77,30 @@ public class TextTailTest {
         writer.newLine();
         writer.write("qwerty");
         writer.flush();
-        tail.tail("input.txt", "output.txt");
-        String test = "";
-        BufferedReader reader = new BufferedReader(new FileReader("output.txt"));
-        String line = reader.readLine();
-        while (line != null) {
-            test += line;
-            line = reader.readLine();
+        writer.close();
+        tail.tail(tail.inputName, tail.outputName);
+        BufferedWriter writer2 = new BufferedWriter(new FileWriter("test.txt"));
+        writer2.write("bombom" + '\n' + "qwerty");
+        writer2.flush();
+        assertEquals(Files.readAllLines(Paths.get("test.txt")), Files.readAllLines(Paths.get(tail.outputName)));
+    }
+
+    @Test
+    public void testingNullNumberOfCharsAndString() throws IOException {
+        TextTail tail = new TextTail(null, null,
+                "input.txt", "output.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
+        for (int i = 0; i < 12; i++) {
+            writer.write("asd" + '\n');
         }
-        assertEquals("bombomqwerty", test);
+        writer.flush();
+        writer.close();
+        tail.tail(tail.inputName, tail.outputName);
+        BufferedWriter writer2 = new BufferedWriter((new FileWriter("test.txt")));
+        for (int i = 0; i < 10; i++) {
+            writer2.write("asd" + '\n');
+        }
+        writer2.flush();
+        assertEquals(Files.readAllLines(Paths.get("test.txt")), Files.readAllLines(Paths.get(tail.outputName)));
     }
 }
