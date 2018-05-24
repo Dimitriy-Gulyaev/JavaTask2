@@ -76,6 +76,8 @@ hs_err_pid*
 
 JavaTask2.iml
 input.txt
+input1.txt
+input2.txt
 output.txt
 target/
 test.txt

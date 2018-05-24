@@ -2,105 +2,94 @@ package org.spbstu.gulyaev;
 
 import org.junit.Test;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
 public class TextTailTest {
 
     @Test
-    public void testingTextTailOnCharWithOneStringFile() throws IOException {
-        TextTail tail = new TextTail(5, null,
-                "input.txt", "output.txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
-        writer.write("asd asd asdasd asdasd asd asdfg");
-        writer.flush();
-        tail.tail(tail.inputName, tail.outputName);
-        String test = "";
-        BufferedReader reader = new BufferedReader(new FileReader(tail.outputName));
-        String line = reader.readLine();
-        while (line != null) {
-            test += line;
-            line = reader.readLine();
-        }
-        assertEquals("asdfg", test);
+    public void testingTextTailOnCharWithOneString() {
+        TextTail tail = new TextTail(5, null);
+        ArrayList<String> test = new ArrayList<>();
+        test.add("asd asd asdasd asdasd asd asdfg");
+        ArrayList<String> expect = new ArrayList<>();
+        expect.add("asdfg");
+        assertEquals(expect, tail.tail(test));
     }
 
     @Test
-    public void testingTextTailOnCharWithManyStringFile() throws IOException {
-        TextTail tail = new TextTail(12, null,
-                "input.txt", "output.txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
-        writer.write("qwertyqwerty");
-        writer.newLine();
-        writer.write("qwertyqwertyasdasd");
-        writer.newLine();
-        writer.write("qwerty");
-        writer.newLine();
-        writer.flush();
-        tail.tail(tail.inputName, tail.outputName);
-        List<String> test = Files.readAllLines(Paths.get(tail.outputName));
-        assertEquals("asdasd" + '\n' + "qwerty", test.get(0) + '\n' + test.get(1));
+    public void testingTextTailOnCharWithManyStrings() {
+        TextTail tail = new TextTail(12, null);
+        ArrayList<String> test = new ArrayList<>();
+        test.add("asd asd asdasd asdasd asd asdfga");
+        test.add("bombom");
+        ArrayList<String> expect = new ArrayList<>();
+        expect.add("bombom");
+        expect.add("asdfga");
+        assertEquals(expect, tail.tail(test));
     }
 
     @Test
-    public void testingTextTailOnOneStringFile() throws IOException {
-        TextTail tail = new TextTail(null, 1,
-                "input.txt", "output.txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.outputName));
-        writer.write("asd asdfg");
-        writer.flush();
-        tail.tail(tail.inputName, tail.inputName);
-        String test = "";
-        BufferedReader reader = new BufferedReader(new FileReader(tail.outputName));
-        String line = reader.readLine();
-        while (line != null) {
-            test += line;
-            line = reader.readLine();
-        }
-        assertEquals("asd asdfg", test);
+    public void testingTextTailOnOneString() {
+        TextTail tail = new TextTail(null, 1);
+        ArrayList<String> test = new ArrayList<>();
+        test.add("asd asd asdasd asdasd asd asdfg");
+        ArrayList<String> expect = new ArrayList<>();
+        expect.add("asd asd asdasd asdasd asd asdfg");
+        assertEquals(expect, tail.tail(test));
     }
 
     @Test
-    public void testingTextTailOnManyStringsFile() throws IOException {
-        TextTail tail = new TextTail(null, 2,
-                "input.txt", "output.txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
-        writer.write("asd asdfg");
-        writer.newLine();
-        writer.write("asd asdfgasdfgh");
-        writer.newLine();
-        writer.write("bombom");
-        writer.newLine();
-        writer.write("qwerty");
-        writer.flush();
-        writer.close();
-        tail.tail(tail.inputName, tail.outputName);
-        BufferedWriter writer2 = new BufferedWriter(new FileWriter("test.txt"));
-        writer2.write("bombom" + '\n' + "qwerty");
-        writer2.flush();
-        assertEquals(Files.readAllLines(Paths.get("test.txt")), Files.readAllLines(Paths.get(tail.outputName)));
+    public void testingTextTailOnManyStrings() {
+        TextTail tail = new TextTail(null, 2);
+        ArrayList<String> test = new ArrayList<>();
+        test.add("grrrrrrr");
+        test.add("asd asd asdasd asdasd asd asdfg");
+        test.add("bombom");
+        ArrayList<String> expect = new ArrayList<>();
+        expect.add("asd asd asdasd asdasd asd asdfg");
+        expect.add("bombom");
+        assertEquals(expect, tail.tail(test));
     }
 
     @Test
-    public void testingNullNumberOfCharsAndString() throws IOException {
-        TextTail tail = new TextTail(null, null,
-                "input.txt", "output.txt");
-        BufferedWriter writer = new BufferedWriter(new FileWriter(tail.inputName));
-        for (int i = 0; i < 12; i++) {
-            writer.write("asd" + '\n');
+    public void testingNullNumberOfCharsAndString() {
+        TextTail tail = new TextTail(null, null);
+        ArrayList<String> test = new ArrayList<>();
+        for (int i = 0; i <= 12; i++)
+            test.add("bom");
+        ArrayList<String> expect = new ArrayList<>();
+        for (int i = 0; i < 10; i++)
+            expect.add("bom");
+        assertEquals(expect, tail.tail(test));
+    }
+
+    @Test
+    public void numberOfStringBiggerThanText() {
+        TextTail tail = new TextTail(null, 3);
+        ArrayList<String> test = new ArrayList<>();
+        test.add("bom");
+        test.add("bom");
+        try {
+            tail.tail(test);
+        } catch (IllegalArgumentException e) {
+            assertEquals("required number of strings" +
+                    " is bigger than number of strings in the original text", e.getMessage());
         }
-        writer.flush();
-        writer.close();
-        tail.tail(tail.inputName, tail.outputName);
-        BufferedWriter writer2 = new BufferedWriter((new FileWriter("test.txt")));
-        for (int i = 0; i < 10; i++) {
-            writer2.write("asd" + '\n');
+    }
+
+    @Test
+    public void numberOfCharsBiggerThanText() {
+        TextTail tail = new TextTail(7, null);
+        ArrayList<String> test = new ArrayList<>();
+        test.add("bom");
+        test.add("bom");
+        try {
+            tail.tail(test);
+        } catch (IllegalArgumentException e) {
+            assertEquals("required number of chars" +
+                    " is bigger than number of chars in the original text", e.getMessage());
         }
-        writer2.flush();
-        assertEquals(Files.readAllLines(Paths.get("test.txt")), Files.readAllLines(Paths.get(tail.outputName)));
     }
 }

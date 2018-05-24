@@ -1,74 +1,45 @@
 package org.spbstu.gulyaev;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-
 
 public class TextTail {
 
     Integer numberOfChars;
     Integer numberOfStrings;
-    String inputName;
-    String outputName;
 
-    public TextTail(Integer numberOfChars, Integer numberOfStrings, String inputName, String outputName) {
+    public TextTail(Integer numberOfChars, Integer numberOfStrings) {
         this.numberOfChars = numberOfChars;
         this.numberOfStrings = numberOfStrings;
-        this.inputName = inputName;
-        this.outputName = outputName;
     }
 
-    public void tail(String inputName, String outputName) throws IOException {
-        if (numberOfChars == null && numberOfStrings == null) numberOfStrings = 10;
-        if (inputName == null) {
-            inputName = "input.txt";
-            System.out.println("Write your text manually down here, type \"close\" to end the input:");
-            Scanner reader = new Scanner(System.in);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(inputName));
-            try {
-                String temp = reader.nextLine();
-                while (!temp.equals("close")) {
-                    writer.write(temp + '\n');
-                    temp = reader.nextLine();
-                    writer.flush();
+    public List<String> tail(ArrayList<String> text) {
+        if (!text.equals(new ArrayList<String>())) {
+            if (numberOfChars == null && numberOfStrings == null) numberOfStrings = 10;
+            if (numberOfStrings != null) {
+                if (numberOfStrings > text.size()) throw new IllegalArgumentException("required number of strings" +
+                        " is bigger than number of strings in the original text");
+                return text.subList(text.size() - numberOfStrings, text.size());
+            } else {
+                int k = numberOfChars;
+                List<String> result = new ArrayList<>();
+                int i = 1;
+                while (text.get(text.size() - i).length() <= k) {
+                    result.add(text.get(text.size() - i));
+                    k -= text.get(text.size() - i).length();
+                    i++;
+                    if (i > text.size()) throw new IllegalArgumentException("required number of chars" +
+                            " is bigger than number of chars in the original text");
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                if (k != 0) {
+                    if (k > text.get(text.size() - i).substring(text.get(text.size() - i).length() - k).length())
+                        throw new IllegalArgumentException("required number of chars" +
+                                " is bigger than number of chars in the original text");
+                    result.add(text.get(text.size() - i).substring(text.get(text.size() - i).length() - k));
+                }
+                return result;
             }
-            reader.close();
         }
-        boolean consoleOutput = false;
-        if (outputName == null) {
-            outputName = "output.txt";
-            consoleOutput = true;
-        }
-        List<String> text = Files.readAllLines(Paths.get(inputName));
-        if (numberOfStrings != null) {
-            text = text.subList(text.size() - numberOfStrings, text.size());
-            Files.write(Paths.get(outputName), text);
-        }
-        if (numberOfChars != null) {
-            int k = numberOfChars;
-            ArrayList<String> result = new ArrayList<>();
-            BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
-            int i = 1;
-            while (text.get(text.size() - i).length() <= k) {
-                result.add(text.get(text.size() - i) + '\n');
-                k -= text.get(text.size() - i).length();
-                i++;
-            }
-            if (k != 0) {
-                result.add(text.get(text.size() - i).substring(text.get(text.size() - i).length() - k) + '\n');
-            }
-            for (int j = result.size() - 1; j >= 0; j--) {
-                writer.write(result.get(j));
-            }
-            writer.flush();
-        }
-        if (consoleOutput) Files.readAllLines(Paths.get(outputName)).forEach(System.out::println);
+        return new ArrayList<>();
     }
 }
